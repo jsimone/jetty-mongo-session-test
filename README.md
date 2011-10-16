@@ -1,14 +1,19 @@
+MongoDB-backed Session State Sample
+===================================
+
+
+Run Locally
+-----------
+
 # Build
 
 Build the project with
 
-    $ mvn install
+    mvn package
 
 # Configure
 
-You will need to set the `REPO` environment variable, so the execution wrapper script knows where to find the maven dependencies. For example:
-
-    $ export REPO=$HOME/.m2/repository
+    export MONGOHQ_URL=mongodb://foo:foo@127.0.0.1:27017/test
 
 # Run
 
@@ -16,5 +21,15 @@ Now you can run your webapp with:
 
     $ sh target/bin/webapp
 
-(the wrapper script is not executable by default).
+
+Run on Heroku
+-------------
+
+# Create the app on Heroku
+
+    heroku create --stack cedar --addons mongohq:free
+
+# Deploy to Heroku (assuming the files are already in a git repo)
+
+    git push heroku master
 
