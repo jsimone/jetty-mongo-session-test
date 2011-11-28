@@ -12,7 +12,7 @@ import org.eclipse.jetty.server.session.SessionHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
 
 import com.mongodb.DB;
-import com.mongodb.Mongo;
+import com.mongodb.MongoURI;
 
 /**
  * 
@@ -40,27 +40,13 @@ public class Main {
         Server server = new Server(Integer.valueOf(webPort));
         WebAppContext root = new WebAppContext();
         
-        
-        
-        
-        //Parse mango db URL
-        String mongoDbURL = System.getenv("MONGOHQ_URL");
-        
-        System.out.println("mongo url: " + mongoDbURL);
-        
-        Matcher matcher = Pattern.compile("mongodb://(.*):(.*)@(.*):(.*)/(.*)").matcher(mongoDbURL);
-        matcher.find();
-        
-        String mongoUser = matcher.group(1);
-        String mongoPassword = matcher.group(2);
-        String mongoHost = matcher.group(3);
-        String mongoPort = matcher.group(4);
-        String mongoDatabase = matcher.group(5);
+        MongoURI mongoDbURI = new MongoURI(System.getenv("MONGOHQ_URL"));
+        DB connectedDB = mongoURI.connectDB();
 
-        
-        Mongo mongo = new Mongo(mongoHost, Integer.valueOf(mongoPort));
-        DB db = mongo.getDB(mongoDatabase);
-        db.authenticate(mongoUser, mongoPassword.toCharArray());
+        // allow for localhost, non-authenticated Mongo use
+		if (mongoURI.getUsername() != null) {
+			connectedDB.authenticate(mongoURI.getUsername(), mongoURI.getPassword());
+		}
         
         //Set up session handling through MongoDb
         MongoSessionIdManager idMgr = new MongoSessionIdManager(server, db.getCollection("sessions"));
